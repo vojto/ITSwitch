@@ -43,6 +43,7 @@ static CGFloat const kDisabledOpacity = 0.5f;
 @interface ITSwitch () {
     __weak id _target;
     SEL _action;
+    BOOL _wantsAnimation;
 }
 
 @property (nonatomic, getter = isActive) BOOL active;
@@ -92,6 +93,8 @@ static CGFloat const kDisabledOpacity = 0.5f;
 }
 
 - (void)setUp {
+    _wantsAnimation = YES;
+    
     // The Switch is enabled per default
     self.enabled = YES;
     
@@ -177,8 +180,10 @@ static CGFloat const kDisabledOpacity = 0.5f;
 // ----------------------------------------------------
 
 - (void)reloadLayer {
+    CGFloat duration = _wantsAnimation ? kAnimationDuration : 0.0;
+    
     [CATransaction begin];
-    [CATransaction setAnimationDuration:kAnimationDuration];
+    [CATransaction setAnimationDuration:duration];
     {
         // ------------------------------- Animate Border
         // The green part also animates, which looks kinda weird
@@ -259,6 +264,8 @@ static CGFloat const kDisabledOpacity = 0.5f;
 
     self.active = YES;
     
+    _wantsAnimation = YES;
+    
     [self reloadLayer];
 }
 
@@ -269,6 +276,8 @@ static CGFloat const kDisabledOpacity = 0.5f;
     
     NSPoint draggingPoint = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     self.draggingTowardsOn = draggingPoint.x >= NSWidth(self.bounds) / 2.f;
+    
+    _wantsAnimation = YES;
     
     [self reloadLayer];
 }
@@ -287,6 +296,8 @@ static CGFloat const kDisabledOpacity = 0.5f;
     // Reset
     self.dragged = NO;
     self.draggingTowardsOn = NO;
+    
+    _wantsAnimation = YES;
     
     [self reloadLayer];
 }
@@ -348,6 +359,11 @@ static CGFloat const kDisabledOpacity = 0.5f;
     }
     
     [self reloadLayer];
+}
+
+- (void)setChecked:(BOOL)checked animated:(BOOL)wantsAnimation {
+    _wantsAnimation = wantsAnimation;
+    [self setChecked:checked];
 }
 
 - (NSColor *)tintColor {
